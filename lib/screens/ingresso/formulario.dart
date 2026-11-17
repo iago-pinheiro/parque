@@ -74,8 +74,15 @@ void _criaIngresso(
   final int? numeroBilhete = int.tryParse(controladorCampoNumeroBilhete.text);
   final double? valor = double.tryParse(controladorCampoValor.text);
 
-  if (numeroBilhete != null && valor != null) {
+  if (numeroBilhete != null &&
+      numeroBilhete > 0 &&
+      valor != null &&
+      valor > 0) {
     final ingressoCriado = IngressoParque(valor, numeroBilhete);
     Navigator.pop(context, ingressoCriado);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Informe números positivos válidos')),
+    );
   }
 }

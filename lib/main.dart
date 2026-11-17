@@ -1,11 +1,35 @@
-import 'package:flutter/material.dart';
-import 'package:bank/screens/ingresso/lista.dart';
-import 'package:intl/intl.dart';
+import 'dart:io';
 
-void main() => runApp(const AppParque());
+import 'package:flutter/material.dart';
+import 'package:bank/data/ingresso_local_data_source.dart';
+import 'package:bank/repositories/ingresso_repository.dart';
+import 'package:bank/screens/ingresso/lista.dart';
+import 'package:bank/services/ingresso_service.dart';
+import 'package:intl/intl.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isLinux || Platform.isWindows) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+  final local = await SqliteIngressoLocalDataSource.abrir();
+  const apiUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://10.0.2.2:8080',
+  );
+  final repository = IngressoRepository(
+    local,
+    IngressoService(Uri.parse(apiUrl)),
+  );
+  runApp(AppParque(repository: repository));
+}
 
 class AppParque extends StatelessWidget {
-  const AppParque({super.key});
+  final IngressoRepository repository;
+
+  const AppParque({super.key, required this.repository});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +82,7 @@ class AppParque extends StatelessWidget {
           border: OutlineInputBorder(), // Define borda padrão
         ),
       ),
-      home: const ListaIngressos(),
+      home: ListaIngressos(repository: repository),
     );
   }
 }

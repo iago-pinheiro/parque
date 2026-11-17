@@ -1,40 +1,68 @@
-# parque
+# Parque
 
-Aplicação Flutter de controle de ingressos de parque de diversões.
+Aplicativo Flutter para cadastro de ingressos de parque de diversões, com
+persistência offline-first em SQLite e sincronização manual com uma API Dart e
+PostgreSQL.
 
-Avaliação prática da disciplina de Programação para Dispositivos Móveis II.
+Projeto avaliativo da disciplina de Programação para Dispositivos Móveis II.
 
-## Como rodar
+## Arquitetura
 
-1. Instale o Flutter: https://docs.flutter.dev/get-started/install
+- **SQLite:** o ingresso é salvo primeiro no dispositivo como pendente.
+- **Repository:** coordena a persistência local e remota.
+- **Service:** faz a comunicação HTTP com a API.
+- **PostgreSQL:** armazena os ingressos sincronizados na API.
+- **Sincronização manual:** o botão na barra superior envia os pendentes e
+  atualiza a base local com os registros remotos.
 
-2. Abra o terminal na pasta do projeto:
-
-```bash
-git clone https://github.com/iago-pinheiro/parque.git
-cd parque
-```
-
-3. Baixe as dependências:
+## Executar o aplicativo
 
 ```bash
 flutter pub get
+flutter run --dart-define=API_URL=http://localhost:8080
 ```
 
-4. Rode no navegador:
+No emulador Android, use `http://10.0.2.2:8080` para acessar uma API executada
+na máquina local. Para a API publicada, informe sua URL HTTPS.
+
+## Executar a API
+
+A API exige um PostgreSQL e lê a conexão da variável `DATABASE_URL`.
 
 ```bash
-flutter run -d chrome --web-port 8080
+cd api
+dart pub get
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/parque dart run bin/server.dart
 ```
 
-O app abre em `http://localhost:8080`.
+A tabela `ingressos` é criada automaticamente ao iniciar a API.
 
-Para rodar em outro dispositivo, use `flutter devices` para ver as opções
-(ex.: `flutter run -d linux`).
+## Rotas da API
 
-## Como usar
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/health` | Confirma que a API está disponível. |
+| `GET` | `/ingressos` | Lista os ingressos persistidos no PostgreSQL. |
+| `POST` | `/ingressos` | Cria ou atualiza um ingresso pelo número do bilhete. |
 
-- A tela inicial mostra a lista de ingressos.
-- Toque no botão roxo no canto inferior direito para abrir o formulário.
-- Preencha o número do bilhete e o valor (**com ponto**, ex.: `12.50`) e toque em **Confirmar**.
-- Após 1 segundo o ingresso aparece na lista.
+Corpo de `POST /ingressos`:
+
+```json
+{
+  "valor": 45.0,
+  "numeroBilhete": 1001
+}
+```
+
+## Testes
+
+```bash
+flutter analyze
+flutter test
+cd api
+dart analyze
+dart test
+```
+
+O arquivo `render.yaml` configura a publicação da API e de um PostgreSQL no
+Render. O banco gratuito do Render expira após 30 dias.
