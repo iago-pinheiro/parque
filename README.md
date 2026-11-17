@@ -19,15 +19,18 @@ Projeto avaliativo da disciplina de Programação para Dispositivos Móveis II.
 
 ```bash
 flutter pub get
-flutter run --dart-define=API_URL=http://localhost:8080
+flutter run
 ```
 
-No emulador Android, use `http://10.0.2.2:8080` para acessar uma API executada
-na máquina local. Para a API publicada, informe sua URL HTTPS.
+Por padrão, o aplicativo usa a API publicada em
+`https://parque-api-cmuk.onrender.com`. Para usar uma API local, informe outra
+URL com `--dart-define=API_URL=http://10.0.2.2:8080` no emulador Android.
 
 ## Executar a API
 
 A API exige um PostgreSQL e lê a conexão da variável `DATABASE_URL`.
+
+API publicada: https://parque-api-cmuk.onrender.com
 
 ```bash
 cd api
